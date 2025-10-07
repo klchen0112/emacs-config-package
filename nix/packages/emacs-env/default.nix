@@ -40,6 +40,9 @@ in
     "org"
     "seq"
   ];
+  extraPackages = [
+    "setup"
+  ];
 
   localPackages = [
     "pairable"

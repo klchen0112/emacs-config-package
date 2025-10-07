@@ -31,7 +31,10 @@
   outputs =
     inputs:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" ];
+      systems = [
+        "x86_64-linux"
+        "aarch64-darwin"
+      ];
 
       imports = [
         inputs.flake-parts.flakeModules.partitions
@@ -79,6 +82,7 @@
                 sha256 = old.src.outputHash;
               };
             });
+            emacs-macport = pkgs.emacs-macport;
 
             emacs-env = pkgs.callPackage ./nix/packages/emacs-env {
               org-babel-lib = inputs.org-babel.lib;
@@ -92,6 +96,10 @@
               emacs = config.packages.emacs-pgtk;
             };
 
+            emacs-env-macport = config.packages.emacs-env.override {
+              emacs = config.packages.emacs-macport;
+            };
+
             emacs-config = pkgs.callPackage ./nix/packages/emacs-config {
               twist-lib = inputs.twist.lib;
               rootPath = ./.;
@@ -101,6 +109,11 @@
             emacs-config-pgtk = config.packages.emacs-config.override {
               emacs = config.packages.emacs-pgtk;
               emacs-env = config.packages.emacs-env-pgtk;
+            };
+
+            emacs-config-macport = config.packages.emacs-config.override {
+              emacs = config.packages.emacs-macport;
+              emacs-env = config.packages.emacs-env-macport;
             };
           };
 

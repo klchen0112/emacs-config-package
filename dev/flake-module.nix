@@ -12,6 +12,7 @@
     {
       config,
       pkgs,
+      lib,
       ...
     }:
     {
@@ -60,9 +61,14 @@
         default = pkgs.writeShellApplication {
           name = "test-emacs-config";
           runtimeInputs = [
-            config.packages.emacs-env
             pkgs.xorg.lndir
-          ];
+          ]
+          ++ (lib.optional pkgs.stdenv.isDarwin [
+            config.packages.emacs-env-macport
+          ])
+          ++ (lib.optional pkgs.stdenv.isLinux [
+            config.packages.emacs-env-pgtk
+          ]);
           text = ''
             XDG_DATA_DIRS="$XDG_DATA_DIRS:${
               builtins.concatStringsSep ":" (map (x: "${x}/share") config.packages.emacs-config.runtimeInputs)
