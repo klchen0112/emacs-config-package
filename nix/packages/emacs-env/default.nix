@@ -4,14 +4,22 @@
   twist-lib,
   rootPath,
   melpaSrc,
+  elpaSrc,
+  nongnuElpaSrc,
   pkgs,
   emacs,
+  nativeCompileAheadDefault ? true,
 }:
 
 let
   initEl = lib.pipe (rootPath + "/init.org") [
     builtins.readFile
-    (org-babel-lib.tangleOrgBabel { })
+    (org-babel-lib.tangleOrgBabel {
+      languages = [
+        "emacs-lisp"
+        "elisp"
+      ];
+    })
     (builtins.toFile "init.el")
   ];
 
@@ -22,15 +30,29 @@ let
   };
 in
 (twist-lib.makeEnv {
-  inherit pkgs;
+  inherit pkgs nativeCompileAheadDefault;
   emacsPackage = emacs;
 
   initFiles = [ initEl ];
   lockDir = rootPath + "/lock";
+  initParser = twist-lib.parseSetup { inherit lib; } { };
+  registries = import ./registries.nix {
+    inherit
+      rootPath
+      melpaSrc
+      elpaSrc
+      nongnuElpaSrc
+      ;
+  };
 
-  registries = import ./registries.nix { inherit rootPath melpaSrc; };
-
-  inputOverrides = import ./inputOverrides.nix { inherit rootPath lib; };
+  inputOverrides = import ./inputOverrides.nix { inherit rootPath lib; } // {
+    lib-meow = _: _: {
+      src = lib.sourceByRegex rootPath [
+        "lisp"
+        "lisp/lib-meow.el"
+      ];
+    };
+  };
 
   initialLibraries = [
     "cl-lib"
@@ -42,13 +64,12 @@ in
   ];
   extraPackages = [
     "setup"
+    "cl-lib"
   ];
 
   localPackages = [
-    "pairable"
-    "readable"
-    "readable-mono-theme"
-    "readable-typo-theme"
+    "lib-meow"
   ];
+  exportManifest = true;
 }).overrideScope
   packageOverrides

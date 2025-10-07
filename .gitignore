@@ -9,6 +9,6 @@ result-*
 
 # Generated
 init.el
-
+early-init.el
 # Backup files
 *~

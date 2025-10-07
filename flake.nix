@@ -9,7 +9,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 
-    flake-parts.url = "github:hercules-ci/flake-parts";
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
 
     emacs-overlay = {
       url = "github:nix-community/emacs-overlay";
@@ -26,6 +29,19 @@
       url = "github:melpa/melpa";
       flake = false;
     };
+    elpa = {
+      # Use a GitHub mirror for a higher availability
+      url = "github:elpa-mirrors/elpa";
+      # url = "git+https://git.savannah.gnu.org/git/emacs/elpa.git?ref=main";
+      flake = false;
+    };
+    nongnu-elpa = {
+      # Use a GitHub mirror for a higher availability
+      url = "github:elpa-mirrors/nongnu";
+      # url = "git+https://git.savannah.gnu.org/git/emacs/nongnu.git?ref=main";
+      flake = false;
+    };
+
   };
 
   outputs =
@@ -89,6 +105,8 @@
               twist-lib = inputs.twist.lib;
               rootPath = ./.;
               melpaSrc = inputs.melpa.outPath;
+              elpaSrc = inputs.elpa.outPath;
+              nongnuElpaSrc = inputs.nongnu-elpa.outPath;
               inherit (config.packages) emacs;
             };
 

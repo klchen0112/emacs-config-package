@@ -1,6 +1,9 @@
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle init.el
+:END:
 #+TITLE: GNU Emacs Configuration
 #+AUTHOR: Terje Larsen
-#+PROPERTY: header-args:emacs-lisp :tangle yes
+
 * Overview
 Terje's GNU Emacs configuration.
 
@@ -47,103 +50,19 @@ Nix:
 #+CAPTION: emacs-lisp-mode dark
 [[./media/emacs-lisp-mode-dark.png]]
 
-* Early initialization
-
-#+begin_src emacs-lisp :tangle early-init.el
-;;; early-init.el --- Early Initialization -*- lexical-binding: t; -*-
-#+end_src
-
-** Debug
-Provide an easy way to toggle debug mode which will set certain variables to produce more
-informative output. It can be set either by providing the environment variable =DEBUG= or
-start Emacs with =--debug-init=.
-#+begin_src emacs-lisp :tangle early-init.el
-(when (getenv "DEBUG") (setq init-file-debug t))
-(setq debug-on-error (and (not noninteractive) init-file-debug))
-#+end_src
-
-** Startup
-Time the startup and display the startup time after completed.
-#+begin_src emacs-lisp :tangle early-init.el
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (message "Loaded Emacs in %.03fs"
-                     (float-time (time-subtract after-init-time before-init-time)))))
-#+end_src
-
-Temporarily reduce garbage collection to gain some performance boost during startup.
-#+begin_src emacs-lisp :tangle early-init.el
-(let ((normal-gc-cons-threshold gc-cons-threshold)
-      (normal-gc-cons-percentage gc-cons-percentage)
-      (normal-file-name-handler-alist file-name-handler-alist)
-      (init-gc-cons-threshold most-positive-fixnum)
-      (init-gc-cons-percentage 0.6))
-  (setq gc-cons-threshold init-gc-cons-threshold
-        gc-cons-percentage init-gc-cons-percentage
-        file-name-handler-alist nil)
-  (add-hook 'after-init-hook
-            `(lambda ()
-               (setq gc-cons-threshold ,normal-gc-cons-threshold
-                     gc-cons-percentage ,normal-gc-cons-percentage
-                     file-name-handler-alist ',normal-file-name-handler-alist))))
-#+end_src
-
-Inhibit startup screen and messages. If you are new to Emacs it is recommended to not
-disable the startup screen as it has great content to get you going.
-#+begin_src emacs-lisp :tangle early-init.el
-(setq inhibit-startup-echo-area-message t)
-(setq inhibit-startup-screen t)
-(setq initial-scratch-message nil)
-#+end_src
-
-Performance tweaks.  Don't load default library and use =fundamental-mode= to reduce amount
-of hooks.
-#+begin_src emacs-lisp :tangle early-init.el
-(setq inhibit-default-init t)
-(setq initial-major-mode 'fundamental-mode)
-#+end_src
-
-Disable =package.el= support. Packages are managed via Nix and disabling this gives a slight
-performance boost.
-#+begin_src emacs-lisp :tangle early-init.el
-(setq package-enable-at-startup nil)
-(setq package-quickstart nil)
-#+end_src
-
-** UI
-Disable GUI components.
-#+begin_src emacs-lisp :tangle early-init.el
-(setq use-dialog-box nil)
-(push '(undecorated . t) default-frame-alist)
-(push '(menu-bar-lines . 0) default-frame-alist)
-(push '(tool-bar-lines . 0) default-frame-alist)
-(push '(vertical-scroll-bars) default-frame-alist)
-#+end_src
-
-Don't implicitly resize frames when changing various settings.
-#+begin_src emacs-lisp :tangle early-init.el
-(setq frame-inhibit-implied-resize t)
-(defvar global-text-scale-adjust-resizes-frames t)
-#+end_src
-
-Allow resizing by dragging internal border.
-#+begin_src emacs-lisp :tangle early-init.el
-(push '(drag-internal-border . t) default-frame-alist)
-#+end_src
-
-Ignore X resources.
-#+begin_src emacs-lisp :tangle early-init.el
-(advice-add #'x-apply-session-resources :override #'ignore)
-#+end_src
-
 * Initialization
-#+begin_src emacs-lisp :tangle yes
+
+#+begin_src emacs-lisp
 ;;; init.el --- Initialization -*- lexical-binding: t; -*-
 #+end_src
 
-** Package configuration
+** PaChoose a snippet: ckage configuration
 *** Setup
-#+begin_src emacs-lisp :tangle yes
+:PROPERTIES:
+:SORTING_TYPE: a
+:END:
+
+#+begin_src emacs-lisp
 (eval-when-compile
     (require 'setup)
     (require 'cl-lib)
@@ -175,7 +94,7 @@ Ignore X resources.
       :shorthand cadr))
 #+end_src
 *** :reformatters
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (eval-when-compile
     (define-setup-macro
      :reformatters (&rest entries)
@@ -186,29 +105,28 @@ Ignore X resources.
                   `(reformatter-define ,name ,@args))
                 entries)))))
 #+end_src
-*** :reformatters
-#+begin_src emacs-lisp :tangle yes
-  (eval-when-compile
-    (define-setup-macro
-     :reformatters (&rest entries)
-     "Define reformatters."
-     (let ((feature (setup-get 'feature)))
-       (macroexp-progn
-        (mapcar (pcase-lambda (`(,name . ,args))
-                  `(reformatter-define ,name ,@args))
-                entries)))))
+*** :load-after
+#+begin_src emacs-lisp
+(eval-when-compile
+  (setup-define :load-after
+                (lambda (&rest features)
+                  (let ((body `(require ',(setup-get 'feature))))
+                    (dolist (feature (nreverse features))
+                      (setq body `(with-eval-after-load ',feature ,body)))
+                    body))
+                :documentation "Load the current feature after FEATURES."))
 #+end_src
 *** :set
-
-#+begin_src  emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (eval-when-compile
     (define-setup-macro
      :set (&rest args)
      "Set the default values of variables."
      `(setq-default ,@args)))
+
 #+end_src
 *** :keymap-unset
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (eval-when-compile
     (define-setup-macro
      :keymap-unset (key)
@@ -218,7 +136,7 @@ Ignore X resources.
      `(keymap-unset ,(setup-get 'map) ,key)))
 #+end_src
 *** :mode-repl
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (eval-when-compile
     (define-setup-macro :mode-repl (repl-fn)
       "Add an entry to `rtog/mode-repl-alist'."
@@ -237,56 +155,66 @@ Ignore X resources.
 #+end_src
 ** Data
 Provide a location where Emacs can store data and cache.
-#+begin_src emacs-lisp :tangle yes
-(defvar data-dir
-  (if (getenv "XDG_DATA_HOME")
-      (concat (getenv "XDG_DATA_HOME") "/emacs/")
-    (expand-file-name "~/.local/share/emacs/"))
-  "Directory for data.")
+#+begin_src emacs-lisp
+(setup constants
+       (defvar data-dir
+         (if (getenv "XDG_DATA_HOME")
+             (concat (getenv "XDG_DATA_HOME") "/emacs/")
+           (expand-file-name "~/.local/share/emacs/"))
+         "Directory for data.")
 
-(defvar cache-dir
-  (if (getenv "XDG_CACHE_HOME")
-      (concat (getenv "XDG_CACHE_HOME") "/emacs/")
-    (expand-file-name "~/.cache/emacs/"))
-  "Directory for cache.")
+       (defvar cache-dir
+         (if (getenv "XDG_CACHE_HOME")
+             (concat (getenv "XDG_CACHE_HOME") "/emacs/")
+           (expand-file-name "~/.cache/emacs/"))
+         "Directory for cache.")
 
-(defvar pictures-dir
-  (or (getenv "XDG_PICTURES_DIR")
-      (expand-file-name "~/Pictures/"))
-  "Directory for pictures.")
+       (defvar pictures-dir
+         (or (getenv "XDG_PICTURES_DIR")
+             (expand-file-name "~/Pictures/"))
+         "Directory for pictures.")
+       )
 #+end_src
 
 *** Customization
 Put custom definitions in a temporary file so it doesn't grow over time. This means all
 customization will disappear upon reboot and instead needs to be managed via the
 initialization file.
-#+begin_src emacs-lisp :tangle yes
-(setq custom-file (expand-file-name "custom.el" temporary-file-directory))
+#+begin_src emacs-lisp
+(setup custom-file
+   (setq custom-file (expand-file-name "custom.el" temporary-file-directory))
+)
 #+end_src
 
 ** Performance
 No second pass of case-insensitive search over =auto-mode-alist=.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
+(setup auto-mode-case-fold
 (setq auto-mode-case-fold nil)
+)
 #+end_src
 
 Give up some bidirectional functionality for slightly faster re-display.
-#+begin_src emacs-lisp :tangle yes
-(setq bidi-inhibit-bpa t)
-(setq-default bidi-display-reordering 'left-to-right
-              bidi-paragraph-direction 'left-to-right)
+#+begin_src emacs-lisp
+(setup bidirectional
+       (setq bidi-inhibit-bpa t)
+       (setq-default bidi-display-reordering 'left-to-right
+                     bidi-paragraph-direction 'left-to-right)
+       )
 #+end_src
 
 Defer processing font faces while scrolling and typing.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
+(setup jit
 (setq fast-but-imprecise-scrolling t)
 (setq jit-lock-defer-time 0)
+)
 #+end_src
 
 *** gcmh
 Adjust Garbage Collector threshold depending on activity and try to run garbage collection
 during idle instead.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup gcmh
        (:package gcmh)
        (:hook-into after-init-hook)
@@ -296,27 +224,11 @@ during idle instead.
         gcmh-verbose init-file-debug))
 #+end_src
 
-*** explain-pause-mode
-Track how much time is spent in each function and present a view to investigate this data.
-#+begin_src emacs-lisp :tangle no
-(use-package explain-pause-mode
-  :ensure t
-  :commands
-  (explain-pause-mode)
-  :init
-  (when init-file-debug
-    (explain-pause-mode 1)))
-#+end_src
-
-*** vlf
-Large file support. This can view/edit/search and compare large files.
-#+begin_src emacs-lisp :tangle no
-(use-package vlf :ensure t)
-#+end_src
 
 *** benchmark-init
-#+begin_src emacs-lisp :tangle yes
-  (setup (:package benchmark-init)
+#+begin_src emacs-lisp
+  (setup benchmark-init
+         (:package benchmark-init)
          (:require benchmark-init)
          (:only-if init-file-debug
   		 (add-hook 'after-init-hook 'benchmark-init/deactivate))
@@ -326,12 +238,12 @@ Large file support. This can view/edit/search and compare large files.
 ** Libraries
 *** nerd-icons
 Library for displaying icons. I am trying to use icons where possible.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup nerd-icons
        (:package nerd-icons))
 #+end_src
 *** Treesit
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (setup treesit
          (:only-if (fboundp 'treesit-available-p))
          )
@@ -339,93 +251,97 @@ Library for displaying icons. I am trying to use icons where possible.
 #+end_src
 ** Functions
 ** Localization
-#+begin_src emacs-lisp :tangle yes
-(setq-default calendar-week-start-day 1)
+#+begin_src emacs-lisp
+(setup localization
+       (:set calendar-week-start-day 1)
+       )
 #+end_src
 
 ** Shell
 Set shell to bash as fish is not compatible with all packages using the shell.
-#+begin_src emacs-lisp :tangle yes
-(setq shell-file-name "bash")
+#+begin_src emacs-lisp
+(setup shell
+(:set shell-file-name "bash")
+)
 #+end_src
 
 ** Region
 Fix WSL/WSLg copy issue.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setq select-active-regions nil)
 #+end_src
 
 ** UX
 Disable bell (both visual and audible).
-#+begin_src emacs-lisp :tangle yes
-(setq ring-bell-function #'ignore)
-(setq visible-bell nil)
+#+begin_src emacs-lisp
+;; (setq ring-bell-function #'ignore)
+;; (setq visible-bell nil)
 #+end_src
 
 Use =y= / =n= instead of =yes= / =no.=
-#+begin_src emacs-lisp :tangle yes
-(setq confirm-kill-emacs #'y-or-n-p)
-(fset #'yes-or-no-p #'y-or-n-p)
+#+begin_src emacs-lisp
+;; (setq confirm-kill-emacs #'y-or-n-p)
+;; (fset #'yes-or-no-p #'y-or-n-p)
 #+end_src
 
 Hide M-x commands which does not work in the current buffer.
-#+begin_src emacs-lisp :tangle yes
-(setq read-extended-command-predicate #'command-completion-default-include-p)
+#+begin_src emacs-lisp
+;; (setq read-extended-command-predicate #'command-completion-default-include-p)
 #+end_src
 
 * Appearance
 ** Fonts
 *** Size
-#+begin_src emacs-lisp :tangle yes
-(defvar init-line-spacing 0.25
-  "Spacing between lines.")
+#+begin_src emacs-lisp
+;; (defvar init-line-spacing 0.25
+;;   "Spacing between lines.")
 
-(defvar init-default-font-height 105
-  "Default font height.")
+;; (defvar init-default-font-height 105
+;;   "Default font height.")
 #+end_src
 
 *** Face
-#+begin_src emacs-lisp :tangle yes
-(defvar init-fixed-pitch-font "Iosevka Curly Slab"
-  "Font used for fixed-pitch faces.")
+#+begin_src emacs-lisp
+;; (defvar init-fixed-pitch-font "Iosevka Curly Slab"
+;;   "Font used for fixed-pitch faces.")
 
-(defvar init-variable-pitch-font "Iosevka Aile"
-  "Font used for variable-pitch faces.")
+;; (defvar init-variable-pitch-font "Iosevka Aile"
+;;   "Font used for variable-pitch faces.")
 
-(defvar init-serif-font "Iosevka Etoile"
-  "Font used for serif faces.")
+;; (defvar init-serif-font "Iosevka Etoile"
+;;   "Font used for serif faces.")
 
-(defvar init-unicode-font "Noto Sans Mono"
-  "Fallback font used for unicode glyphs.")
+;; (defvar init-unicode-font "Noto Sans Mono"
+;;   "Fallback font used for unicode glyphs.")
 
-(defvar init-symbol-fonts '("Apple Symobols" "Apple Color Emoji" "Noto Color Emoji" "Liberation Mono" "Noto Sans Symbols2" "SegoUI Emoji" "FreeSerif" "Symbola" "Twitter")
-  "Fonts used for symbol/emoji faces.")
+;; (defvar init-symbol-fonts '("Apple Symobols" "Apple Color Emoji" "Noto Color Emoji" "Liberation Mono" "Noto Sans Symbols2" "SegoUI Emoji" "FreeSerif" "Symbola" "Twitter")
+  ;; "Fonts used for symbol/emoji faces.")
 #+end_src
 
 Setup symbol fonts.
-#+begin_src emacs-lisp :tangle yes
-(dolist (font init-symbol-fonts)
-  (set-fontset-font t 'symbol font nil 'append))
+#+begin_src emacs-lisp
+;; (dolist (font init-symbol-fonts)
+  ;; (set-fontset-font t 'symbol font nil 'append))
 #+end_src
 
 *** Line length
-#+begin_src emacs-lisp :tangle yes
-(setq-default fill-column 110)
+#+begin_src emacs-lisp
+;; (setq-default fill-column 110)
 #+end_src
 
 *** Underline
 Underline line at descent position, not baseline position.
-#+begin_src emacs-lisp :tangle yes
-(setq x-underline-at-descent-line t)
+#+begin_src emacs-lisp
+;; (setq x-underline-at-descent-line t)
 #+end_src
 
 ** Theme
 Use a bar cursor by default.
-#+begin_src emacs-lisp :tangle yes
-(setq-default cursor-type 'bar)
+#+begin_src emacs-lisp
+;; (setq-default cursor-type 'bar)
 #+end_src
 *** ef-themes
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (setup ef-themes
          (:package ef-themes)
          (:set
@@ -442,43 +358,30 @@ Use a bar cursor by default.
 *** Frame
 See [[info:elisp#Frame Layout][Frame Layout]] for details and terminology.
 - Add some padding around the whole window (=internal-border-width=) to provide some air.
-#+begin_src emacs-lisp :tangle yes
-(cl-pushnew '(internal-border-width . 16) default-frame-alist :test #'equal)
+#+begin_src emacs-lisp
+;; (cl-pushnew '(internal-border-width . 16) default-frame-alist :test #'equal)
 #+end_src
 
 *** Fringe
 Setup fringes on both sides and display an indicator for buffer boundaries on the right
 side. Display fringes outside margins to have the [[Padding][padding]] on the inside.
-#+begin_src emacs-lisp :tangle yes
-(setq-default fringes-outside-margins t
-              left-fringe-width 8
-              right-fringe-width 8
-              indicate-buffer-boundaries 'right)
+#+begin_src emacs-lisp
+;; (setq-default fringes-outside-margins t
+;;               left-fringe-width 8
+;;               right-fringe-width 8
+;;               indicate-buffer-boundaries 'right)
 #+end_src
 
 *** Padding
 Add margins inside windows to make text feel less crowded. Padding around the frame is
 configured via the =internal-border-width= in the [[Frame][Frame]] section.
-#+begin_src emacs-lisp :tangle yes
-(setq-default left-margin-width 1
-              right-margin-width 1)
-#+end_src
-
-*** Borders
-Add window dividers, mainly to add a border below the mode line.
-#+begin_src emacs-lisp :tangle no
-(use-package frame
-  :hook
-  ((after-make-frame-functions
-    server-after-make-frame-hook) . window-divider-mode)
-  :init
-  (setq window-divider-default-places t)
-  (setq window-divider-default-bottom-width 1)
-  (setq window-divider-default-right-width 1))
+#+begin_src emacs-lisp
+;; (setq-default left-margin-width 1
+              ;; right-margin-width 1)
 #+end_src
 
 ** Modeline
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (setup dashboard
          (:package dashboard)
          (:set  dashboard-icon-type 'nerd-icons)
@@ -488,7 +391,7 @@ Add window dividers, mainly to add a border below the mode line.
 #+end_src
 
 ** Dashboard
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (setup doom-modeline
          (:package doom-modeline)
          (:hook-into after-init-hook)
@@ -498,7 +401,7 @@ Add window dividers, mainly to add a border below the mode line.
 
 #+end_src
 ** display-line-number
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (setup display-fill-column-indicator (:hook-into prog-mode))
   (setup display-line-numbers (:hook-into prog-mode)
          (:set display-line-numbers-width 2
@@ -506,7 +409,7 @@ Add window dividers, mainly to add a border below the mode line.
 #+end_src
 
 ** Scroll
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 
   (setup pixel-scroll
          (:only-if  (version<= "29" emacs-version)
@@ -518,12 +421,12 @@ Add window dividers, mainly to add a border below the mode line.
 
 * Editor & Keybindings
 ** Editor Config
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup editorconfig)
 #+end_src
 ** Meow with treesitter
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (setup meow
          (:package meow)
          (:also-load lib-meow)
@@ -550,53 +453,31 @@ Add window dividers, mainly to add a border below the mode line.
 #+end_src
 ** Undo
 Increase undo limit.
-#+begin_src emacs-lisp :tangle yes
-(setq undo-limit 1000000)
-(setq undo-strong-limit (* 2 undo-limit))
+#+begin_src emacs-lisp
+(setup undo-fu
+       (:package undo-fu)
+       (:set undo-limit 1000000
+             undo-strong-limit (* 2 undo-limit))
+       )
 #+end_src
 
 ** Synatax & Checker
 * Completion
 Enable indentation and completion with the =TAB= key.
-#+begin_src emacs-lisp :tangle yes
-(setq tab-always-indent 'complete)
+#+begin_src emacs-lisp
+;; (setq tab-always-indent 'complete)
 #+end_src
 
 Cycle with the =TAB= key if there are only few candidates.
-#+begin_src emacs-lisp :tangle yes
-(setq completion-cycle-threshold 3)
+#+begin_src emacs-lisp
+;; (setq completion-cycle-threshold 3)
 #+end_src
 
-** Preview
-Completion preview inline, with quick completion key.
-#+begin_src emacs-lisp :tangle no
-(use-package completion-preview
-  :hook
-  ((comint-mode-hook
-    eshell-mode-hook
-    prog-mode-hook
-    text-mode-hook) . completion-preview-mode)
-  (minibuffer-setup-hook . completion-preview-enable-in-minibuffer)
-  :bind
-  (:map completion-preview-active-mode-map
-        ("TAB" . completion-preview-complete)
-        ("C-e" . completion-preview-insert))
-  :init
-  (setq completion-preview-adapt-background-color nil)
-  (setq completion-preview-minimum-symbol-length 2)
-  :config
-  (defun completion-preview-enable-in-minibuffer ()
-    "Enable Corfu completion in the minibuffer, e.g., `eval-expression'."
-    (when (where-is-internal #'completion-at-point (list (current-local-map)))
-      (completion-preview-mode 1)))
-
-  (cl-pushnew 'org-self-insert-command completion-preview-commands :test #'equal))
-#+end_src
 
 ** Style
 *** orderless
 Space-separated matching components matching in any order.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup orderless
        (:package orderless)
        (:set
@@ -608,7 +489,7 @@ Space-separated matching components matching in any order.
 ** Buffer
 *** corfu
 Completion Overlay Region FUnction.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 
 (setup corfu
        (:package corfu)
@@ -644,7 +525,7 @@ Completion Overlay Region FUnction.
 ** Minibuffer
 *** vertico
 Vertical interactive completion UI.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (setup vertico
          (:package vertico)
          (:also-load orderless)
@@ -658,14 +539,12 @@ Vertical interactive completion UI.
 
 ** snippets
 #+begin_src emacs-lisp
-  (setup tempel
-         (:package tempel)
-         (:also-load tempel-collection)
-         (:set tempel-trigger-prefix "<")
-
-
-         ;; Setup completion at point
-         (defun tempel-setup-capf ()
+(setup tempel
+       (:package tempel)
+       (:also-load tempel-collection)
+       (:set tempel-trigger-prefix "<")
+       ;; Setup completion at point
+       (defun tempel-setup-capf ()
   	 ;; Add the Tempel Capf to `completion-at-point-functions'.
   	 ;; `tempel-expand' only triggers on exact matches. Alternatively use
   	 ;; `tempel-complete' if you want to see all matches, but then you
@@ -676,34 +555,32 @@ Vertical interactive completion UI.
   	 (setq-local completion-at-point-functions
   		     (cons #'tempel-expand
   			   completion-at-point-functions)))
+       (add-hook 'conf-mode-hook 'tempel-setup-capf)
+       (add-hook 'prog-mode-hook 'tempel-setup-capf)
+       (add-hook 'text-mode-hook 'tempel-setup-capf)
+       )
 
-         (add-hook 'conf-mode-hook 'tempel-setup-capf)
-         (add-hook 'prog-mode-hook 'tempel-setup-capf)
-         (add-hook 'text-mode-hook 'tempel-setup-capf)
-
-         )
-
-  (setup tempel-collection
-         (:package tempel-collection)
-         )
+(setup tempel-collection
+       (:package tempel-collection)
+       )
 
 #+end_src
 ** Extensions
 
 *** nerd-icons-completion
-#+begin_src emacs-lisp :tangle yes
-  (setup nerd-icons-completion
-         (:package nerd-icons-completion)
-         (:also-load nerd-icons)
-         (:when-loaded
+#+begin_src emacs-lisp
+(setup nerd-icons-completion
+       (:package nerd-icons-completion)
+       (:also-load nerd-icons)
+       (:when-loaded
   	(add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
-         )
+       )
 
 #+end_src
 
 *** cape
 Completion At Point Extensions.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup cape
        (:package cape)
        (add-hook 'completion-at-point-functions #'cape-dabbrev)
@@ -714,46 +591,24 @@ Completion At Point Extensions.
 
 *** consult
 Commands compatible with ~completing-read~.
-#+begin_src emacs-lisp :tangle yes
-(use-package consult
-  :ensure t
-  :bind
-  (([remap bookmark-jump] . consult-bookmark)
-   ([remap goto-line] . consult-goto-line)
-   ([remap imenu] . consult-imenu)
-   ([remap jump-to-register] . consult-register)
-   ([remap point-to-register] . consult-register-store)
-   ([remap switch-to-buffer] . consult-buffer)
-   ([remap yank-pop] . consult-yank-pop)
-   ("C-c k" . consult-kmacro)
-   ("C-x C-r" . consult-recent-file)
-   (:map search-map
-         ("g" . consult-ripgrep)
-         ("m" . consult-mark)
-         ("M-m" . consult-global-mark)))
-  :init
-  (setq consult-preview-key "M-RET"))
+#+begin_src emacs-lisp
+(setup consult
+       (:package consult)
+       (:set consult-preview-key "M-RET"))
 
-(use-package consult-xref
-  :after xref
-  :functions
-  (consult-xref)
-  :init
-  (setq xref-show-xrefs-function #'consult-xref)
-  (setq xref-show-definitions-function #'consult-xref))
+(setup consult-xref
+       (:set xref-show-xrefs-function #'consult-xref)
+       (:set xref-show-definitions-function #'consult-xref)
+       (:load-after consult xref)
+       )
 #+end_src
-
 *** embark
 #+begin_src emacs-lisp
   (setup embark
          (:package embark))
-  (setup consult
-         (:package consult))
   (setup embark-consult
          (:package embark-consult)
-         (with-eval-after-load 'consult
-  	 (with-eval-after-load 'embark
-  	   (require 'embark-consult)))
+         (:load-after embark consult)
          (:with-mode embark-collect-mode
   		   (:hook consult-preview-at-point-mode))
          )
@@ -761,9 +616,8 @@ Commands compatible with ~completing-read~.
 
 
 *** dabbrev
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup dabbrev
-       (:package dabbrev)
        (:set
         dabbrev-case-replace nil
         dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'")))
@@ -772,43 +626,37 @@ Commands compatible with ~completing-read~.
 
 *** marginalia
 Annotations for completion candidates.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (setup marginalia
          (:package marginalia)
          (:also-load nerd-icons-completion)
          (:hook-into after-init-hook))
 #+end_src
 
-
-
 * Navigation
 
 ** Dired
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 
 
-(setup dired
-       (:also-load dirvish))
 (setup dirvish
+  (:load-after dired)
        (:package dirvish)
        )
 
-(setup dired
-       (:also-load diredfl))
 (setup diredfl
+        (:load-after dired)
        (:package diredfl)
        )
 
 #+end_src
 
 *** Icons
-#+begin_src emacs-lisp :tangle yes
-  (setup dired
-         (:also-load nerd-icons-dired)
-
+#+begin_src emacs-lisp
 
   (setup nerd-icons-dired
     (:package nerd-icons-dired)
+    (:load-after dired)
          (:hook-into dired-mode-hook))
 
 #+end_src
@@ -822,13 +670,13 @@ Annotations for completion candidates.
 #+end_src
 
 ** Isearch
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup isearch
        (:set isearch-lazy-count t))
 #+end_src
 
 ** Occur
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup replace)
 
 (setup noccur)
@@ -837,7 +685,7 @@ Annotations for completion candidates.
 
 
 ** Project
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (setup projectile
          (:package projectile)
          (projectile-mode +1)
@@ -847,7 +695,7 @@ Annotations for completion candidates.
 
 * Development
 Reduce scroll margin.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (defun prog-scroll-margin-setup ()
   "Setup `scroll-margin' for `prog-mode'."
   (setq-local scroll-margin 3))
@@ -855,19 +703,19 @@ Reduce scroll margin.
 #+end_src
 
 ** Compilation
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 #+end_src
 
 ** Containers
 *** Docker
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup docker
        (:package docker))
 #+end_src
 
 **** Files
 Support for Docker related files.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup dockerfile-ts-mode
   (:match-file
   "Dockerfile\\'"
@@ -875,28 +723,26 @@ Support for Docker related files.
 #+end_src
 
 *** Kubernetes
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup kubernetes (:package kubernetes))
 #+end_src
 
 ** Coverage
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
+
 #+end_src
 
 ** Docs
 *** DevDocs
 Lookup documentation via DevDocs.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup devdocs
        (:package devdocs))
 #+end_src
 
 ** Folding
 Code folding with treesit-fold
-#+begin_src emacs-lisp :tangle yes
-(setup treesit
-       (:also-load treesit-fold)
-       )
+#+begin_src emacs-lisp
 (setup treesit-fold
        (:only-if (fboundp 'treesit-available-p))
        (:package treesit-fold)
@@ -908,7 +754,8 @@ Code folding with treesit-fold
 
 
 #+begin_src emacs-lisp
-(setup (:package reformatter)
+(setup reformatter
+       (:package reformatter)
        (:reformatters
   	;; If you use prettier, you need to install its executable separately.
   	(prettier
@@ -945,7 +792,7 @@ Code folding with treesit-fold
 ** REPL
 
 *** repl-toggle
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup repl-toggle
        (:package repl-toggle)
   (:set rtog/goto-buffer-fun 'pop-to-buffer)
@@ -957,7 +804,7 @@ Code folding with treesit-fold
 
 ** Syntax checker
 Silence next/previous error, by default it produces a message every time.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (advice-add 'next-error :around #'quiet-function-advice)
 (advice-add 'previous-error :around #'quiet-function-advice)
 #+end_src
@@ -966,7 +813,7 @@ Silence next/previous error, by default it produces a message every time.
 Connect flymake to =next-error-function= and add some navigation bindings. Disable the
 legacy diagnostic functions as some of them have bugs and cause instability (mainly the
 Haskell one).
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup flymake
   (:package flymake)
   (:with-feature flymake-proc)
@@ -975,30 +822,29 @@ Haskell one).
 #+end_src
 
 ** Version control
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setq vc-follow-symlinks t)
 (setq vc-make-backup-files nil)
 #+end_src
 
 *** diff
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup diff
   (:set diff-font-lock-prettify t))
 #+end_src
 
 *** diff-hl
 Diff indicators in fringe
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup diff-hl
        (:package diff-hl))
 #+end_src
 
 *** magit
 Enhanced git related views and commands.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup magit
        (:package magit)
-       (:also-load forge)
        )
 
 (setup forge
@@ -1018,7 +864,7 @@ Enhanced git related views and commands.
 ** LSP
 *** eglot
 Generic Language Server Protocol integration via ~eglot~.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup eglot
        (:package eglot)
        (:defer 3)
@@ -1068,7 +914,7 @@ Generic Language Server Protocol integration via ~eglot~.
 
 * Appearance
 *** Ligatures
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup ligature
        (:package ligature)
        (:hook-into prog-mode-hook)
@@ -1101,18 +947,13 @@ Generic Language Server Protocol integration via ~eglot~.
   		      )
        )
 
-(setup org
-       (:also-load org-download))
-
 (setup org-download
        (:package org-download)
+       (:load-after org)
        (:set   org-download-method 'directory
   	       org-download-image-dir "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/org-attach"
   	       org-download-heading-lvl 'nil)
        )
-
-(setup org
-       (:also-load org-modern))
 
 (setup org-modern
        (:package org-modern)
@@ -1149,20 +990,18 @@ Generic Language Server Protocol integration via ~eglot~.
 #+end_src
 ** Org-roam
 #+begin_src emacs-lisp
-  (setup org
-         (:also-load org-roam))
 
   (setup org-roam
          (:package org-roam)
+         (:load-after org)
          (:set org-roam-directory (file-truename org-directory))
          (:when-loaded  (org-roam-db-autosync-mode)
   		      (setq org-id-link-to-org-use-id t)
   		      (setq org-roam-completion-everywhere t))
          )
 
-  (setup org-roam
-         (:also-load org-roam-ui))
   (setup org-roam-ui
+  (:load-after org-roam)
          (:package org-roam-ui)
          (:when-loaded
   	(setq org-roam-ui-sync-theme t
@@ -1173,6 +1012,7 @@ Generic Language Server Protocol integration via ~eglot~.
   	))
 
   (setup org-roam
+    (:load-after org-roam)
          (:also-load org-roam-timestamps))
   (setup org-roam-timestamps
          (:package org-roam-timestamps)
@@ -1180,15 +1020,14 @@ Generic Language Server Protocol integration via ~eglot~.
          (:set org-roam-timestamps-parent-file t))
 
 
-  (setup org-roam
-         (:also-load org-transclusion))
+
   (setup org-transclusion
+    (:load-after org-roam)
          (:package org-transclusion)
          (:hook-into org-roam-mode-hook) )
 
-  (setup org-roam
-         (:also-load consult-org-roam))
   (setup consult-org-roam
+    (:load-after org-roam consult)
          (:package consult-org-roam)
          (:set
   	;; Use `ripgrep' for searching with `consult-org-roam-search'
@@ -1199,31 +1038,19 @@ Generic Language Server Protocol integration via ~eglot~.
   	;; in consult-buffer (and not down at the bottom)
   	consult-org-roam-buffer-after-buffers t
   	)
-         (with-eval-after-load 'consult))
+)
 #+end_src
 *
 * Major modes
 ** emacs-lisp
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup elisp-mode
-       (:package elisp-mode)
        (:hook flymake-mode outline-minor-mode))
 #+end_src
 
 
 ** outline
 Display outlines in text like files or use it in conjunction with other major modes via ~outline-minor-mode~.
-*** Packages
-**** outline-minor-faces
-Add faces to =outline-minor-mode= in order to make the headings stand out.
-#+begin_src emacs-lisp :tangle yes
-(use-package outline-minor-faces
-  :ensure t
-  :after outline
-  :hook
-  (outline-minor-mode-hook . outline-minor-faces-mode))
-#+end_src
-
 ** clojure
 #+begin_src emacs-lisp :tangle no
 (use-package clojure-mode
@@ -1240,7 +1067,7 @@ Add faces to =outline-minor-mode= in order to make the headings stand out.
 
 *** Packages
 **** cider
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (use-package cider
   :ensure t
   :commands
@@ -1469,7 +1296,7 @@ Elm and elm-mode seems unmaintained at the moment, so I disable this.
 
 *** Packages
 **** gotest
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (use-package gotest
   :ensure t
   :bind
@@ -1553,7 +1380,7 @@ Elm and elm-mode seems unmaintained at the moment, so I disable this.
 
 *** Packages
 **** gradle-mode
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup gradle-mode
        (:package gradle-mode)
        (:hook-into java-base-mode-hook kotlin-mode-hook)
@@ -1576,26 +1403,24 @@ Elm and elm-mode seems unmaintained at the moment, so I disable this.
 #+end_src
 
 ** json
-#+begin_src emacs-lisp :tangle yes
-(use-package json-ts-mode
-  :mode
-  "\\(?:\\(?:\\.json\\|\\.jsonld\\|\\.babelrc\\|\\.bowerrc\\|composer\\.lock\\)\\'\\)")
+#+begin_src emacs-lisp
+(setup json-ts-mode
+       (:match-file
+        "\\(?:\\(?:\\.json\\|\\.jsonld\\|\\.babelrc\\|\\.bowerrc\\|composer\\.lock\\)\\'\\)")
+       )
 
-(cl-pushnew '(json-mode . json-ts-mode) major-mode-remap-alist :test #'equal)
 #+end_src
 
 *** Packages
 **** json-navigator
-#+begin_src emacs-lisp :tangle yes
-(use-package json-navigator
-  :ensure t
-  :bind
-  (:map json-ts-mode-map ("C-. n" . json-navigator-navigate-region)))
+#+begin_src emacs-lisp
+(setup json-navigator)
 #+end_src
 
 ** kotlin
-#+begin_src emacs-lisp :tangle yes
-(use-package kotlin-mode :ensure t)
+#+begin_src emacs-lisp
+(setup kotlin-mode
+       (:package kotlin-mode))
 #+end_src
 
 ** lisp
@@ -1619,7 +1444,7 @@ Elm and elm-mode seems unmaintained at the moment, so I disable this.
 #+end_src
 
 ** lua
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup lua-ts-mode
   (:match-file "\\.lua\\'")
 )
@@ -1645,36 +1470,12 @@ Elm and elm-mode seems unmaintained at the moment, so I disable this.
 #+end_src
 
 *** Packages
-**** edit-indirect
-Edit regions in separate buffers.
-#+begin_src emacs-lisp :tangle yes
-(use-package edit-indirect :ensure t)
-#+end_src
-
 **** markdown-toc
 Generate Table of Contents.
-#+begin_src emacs-lisp :tangle yes
-(use-package markdown-toc :ensure t)
+#+begin_src emacs-lisp
+(setup markdown-toc (:package markdown-toc))
 #+end_src
 
-*** Appearance
-**** Variable pitch
-Use variable-pitch font but still make sure everything aligns.
-#+begin_src emacs-lisp :tangle yes
-(font-lock-add-keywords
- 'markdown-mode
- '(("^[[:space:]-*+>]+" 0 'fixed-pitch append))
- 'append)
-#+end_src
-
-**** Bullet lists
-Pretty check-boxes
-#+begin_src emacs-lisp :tangle yes
-(font-lock-add-keywords
- 'markdown-mode
- '(("^ *[-*+] \\[\\([Xx]\\)\\] "
-    (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "✕"))))))
-#+end_src
 
 ** mermaid
 #+begin_src emacs-lisp :tangle no
@@ -1716,7 +1517,7 @@ Pretty check-boxes
 #+end_src
 
 ** nix
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup nix-ts-mode
        (:package nix-ts-mode)
   (:file-match "\\.nix\\'")
@@ -1727,7 +1528,7 @@ Pretty check-boxes
 
 ** nushell
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup nushell-ts-mode
        (:package nushell-ts-mode)
        (:match-file "\\.nu\\'"))
@@ -1776,10 +1577,10 @@ Pretty check-boxes
   (setup python-ts-mode
          (:file-match "\\.py\\'")
          (:hook indent-bars-mode)
-         (:also-load lazy-ruff)
          )
 
   (setup lazy-ruff
+      (:load-after org-roam)
          (:package lazy-ruff)
   )
 
@@ -1823,7 +1624,7 @@ Pretty check-boxes
 
 *** Packages
 **** flymake-racket
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (use-package flymake-racket
   :ensure t
   :hook
@@ -1894,7 +1695,7 @@ Pretty check-boxes as well as bullet lists.
 
 *** Packages
 **** inf-ruby
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (use-package inf-ruby
   :ensure t
   :hook
@@ -1909,7 +1710,7 @@ Pretty check-boxes as well as bullet lists.
 #+end_src
 
 **** minitest
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (use-package minitest
   :ensure t
   :hook
@@ -1935,14 +1736,14 @@ Pretty check-boxes as well as bullet lists.
 #+end_src
 
 ** scala
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup scala-mode
        (:package scala-mode)
        (:file-match "\\.\\(scala\\|sbt\\)\\'"))
 #+end_src
 
 ** sh
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup sh-script
        (  :hook
           flymake-mode)
@@ -1954,7 +1755,7 @@ Pretty check-boxes as well as bullet lists.
 
 *** Packages
 ** sql
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup sql
   (:set sql-mysql-options '("--protocol=tcp" "--prompt=" "--disable-pager")))
 #+end_src
@@ -2011,7 +1812,7 @@ Display current path for HTML/XML/CSS.
 #+end_src
 
 ** yaml
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup yaml-ts-mode
   (:file-match "\\.\\(e?ya?\\|ra\\)ml\\'")
   (:hook indent-bars-mode)
@@ -2020,7 +1821,7 @@ Display current path for HTML/XML/CSS.
 
 * Tools
 ** Indentation guides
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (setup indent-bars
        (:package indent-bars)
        (:set indent-bars-width-frac 0.2))

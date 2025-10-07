@@ -1,0 +1,2 @@
+(eglot-booster :fetcher github
+            :repo "jdtsmith/eglot-booster")

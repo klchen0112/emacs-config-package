@@ -12,8 +12,14 @@ let
   init = buildElispPackage {
     ename = "config-init";
 
-    src = lib.sourceByRegex rootPath [ "init.org" ];
-    files = [ "init.org" ];
+    src = lib.sourceByRegex rootPath [
+      "init.org"
+      "early-init.org"
+    ];
+    files = [
+      "init.org"
+      "early-init.org"
+    ];
     lispFiles = [
       "early-init.el"
       "init.el"
@@ -53,7 +59,6 @@ stdenv.mkDerivation {
     };
 
     runtimeInputs = [
-      emacs-all-the-icons-fonts
     ];
   };
 

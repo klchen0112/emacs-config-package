@@ -10,28 +10,6 @@
 }:
 
 _final: prev: {
-  all-the-icons = prev.all-the-icons.overrideAttrs (_: {
-    preBuild = ''
-      for i in data/data-*.el; do
-        sed -i -e "1i ;;; -*- lexical-binding: t; -*-" $i
-      done
-    '';
-  });
-
-  cape = prev.cape.overrideAttrs (_: {
-    preBuild = ''
-      substituteInPlace cape-char.el \
-        --replace-fail "when-let" "when-let*"
-    '';
-  });
-
-  corfu = prev.corfu.overrideAttrs (_: {
-    preBuild = ''
-      substituteInPlace corfu-popupinfo.el \
-        --replace-fail "if-let" "if-let*" \
-        --replace-fail "when-let" "when-let*"
-    '';
-  });
 
   devdocs = prev.devdocs.overrideAttrs (_: {
     preBuild = ''
@@ -69,22 +47,4 @@ _final: prev: {
     propagatedBuildInputs = (old.propagatedBuildInputs or [ ]) ++ [ unzip ];
   });
 
-  vterm = prev.vterm.overrideAttrs (old: {
-    nativeBuildInputs = [
-      cmake
-      gcc
-    ];
-    buildInputs = old.buildInputs ++ [ libvterm-neovim ];
-    cmakeFlags = [ "-DEMACS_SOURCE=${emacs.src}" ];
-    preBuild = ''
-      mkdir -p build
-      cd build
-      cmake ..
-      make
-      install -m444 -t . ../*.so
-      install -m600 -t . ../*.el
-      cp -r -t . ../etc
-      rm -rf {CMake*,build,*.c,*.h,Makefile,*.cmake}
-    '';
-  });
 }

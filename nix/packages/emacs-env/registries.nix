@@ -1,4 +1,9 @@
-{ rootPath, melpaSrc }:
+{
+  rootPath,
+  melpaSrc,
+  elpaSrc,
+  nongnuElpaSrc,
+}:
 
 [
   {
@@ -10,6 +15,16 @@
     name = "melpa";
     type = "melpa";
     path = melpaSrc + "/recipes";
+  }
+  {
+    name = "elpa";
+    type = "elpa";
+    path = elpaSrc + "/elpa-packages";
+  }
+  {
+    name = "nongnu-elpa";
+    type = "elpa";
+    path = nongnuElpaSrc + "/elpa-packages";
   }
   {
     name = "gnu-archive";

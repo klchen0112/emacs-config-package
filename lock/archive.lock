@@ -1,1 +1,146 @@
-{}
+{
+  "cl-lib": {
+    "archive": {
+      "narHash": "sha256-bufuwusIfiA+HXtSKV5kVxeaUvijwm3yTWN6INQ4a/M=",
+      "type": "tarball",
+      "url": "https://elpa.gnu.org/packages/cl-lib-0.7.1.tar"
+    },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
+    "packageRequires": {},
+    "version": "0.7.1"
+  },
+  "csv-mode": {
+    "archive": {
+      "narHash": "sha256-ErzKM6usjp2FrrbYwadJCfiivenMCDD9uojwJbzV3co=",
+      "type": "tarball",
+      "url": "https://elpa.gnu.org/packages/csv-mode-1.27.tar"
+    },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
+    "packageRequires": {
+      "cl-lib": "0.5",
+      "emacs": "27.1"
+    },
+    "version": "1.27"
+  },
+  "eglot": {
+    "archive": {
+      "narHash": "sha256-amEVmFvrsPnkpy/PJvBJTP9PnXGQZysyuzLzvXfpkcs=",
+      "type": "tarball",
+      "url": "https://elpa.gnu.org/packages/eglot-1.18.tar"
+    },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
+    "packageRequires": {
+      "compat": "27.1",
+      "eldoc": "1.14.0",
+      "emacs": "26.3",
+      "external-completion": "0.1",
+      "flymake": "1.2.1",
+      "jsonrpc": "1.0.24",
+      "project": "0.9.8",
+      "seq": "2.23",
+      "track-changes": "1.2",
+      "xref": "1.6.2"
+    },
+    "version": "1.18"
+  },
+  "eldoc": {
+    "archive": {
+      "narHash": "sha256-wPljy3uGYMz04r+St/3MSRR/aNxom825THGckLD/SUc=",
+      "type": "tarball",
+      "url": "https://elpa.gnu.org/packages/eldoc-1.16.0.tar"
+    },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
+    "packageRequires": {
+      "emacs": "26.3"
+    },
+    "version": "1.16.0"
+  },
+  "external-completion": {
+    "archive": {
+      "narHash": "sha256-Ykb39+WD8oGVMtBNdNJlKLag2YqxD8aTzCS3b1S6MfI=",
+      "type": "tarball",
+      "url": "https://elpa.gnu.org/packages/external-completion-0.1.tar"
+    },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
+    "packageRequires": {},
+    "version": "0.1"
+  },
+  "flymake": {
+    "archive": {
+      "narHash": "sha256-wQpbwDMCN78HNJYACvErDGqz51+hsLfZ4Pe2rnbICqM=",
+      "type": "tarball",
+      "url": "https://elpa.gnu.org/packages/flymake-1.4.1.tar"
+    },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
+    "packageRequires": {
+      "eldoc": "1.14.0",
+      "emacs": "26.1",
+      "project": "0.7.1"
+    },
+    "version": "1.4.1"
+  },
+  "project": {
+    "archive": {
+      "narHash": "sha256-692kk/N82rj3Br7LIZjt9e6leI/bxlU54tM8Ur/XXfg=",
+      "type": "tarball",
+      "url": "https://elpa.gnu.org/packages/project-0.11.1.tar"
+    },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
+    "packageRequires": {
+      "emacs": "26.1",
+      "xref": "1.7.0"
+    },
+    "version": "0.11.1"
+  },
+  "track-changes": {
+    "archive": {
+      "narHash": "sha256-0vOVR+ATfxhH1q/DM8E5Jn9gNjp6Lj8fi0uFbOHHpk8=",
+      "type": "tarball",
+      "url": "https://elpa.gnu.org/packages/track-changes-1.4.tar"
+    },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
+    "packageRequires": {
+      "emacs": "24"
+    },
+    "version": "1.4"
+  },
+  "xref": {
+    "archive": {
+      "narHash": "sha256-02JflsIqBp8rztvpSOwd5fHr53KxOsmSR+K9ONkv668=",
+      "type": "tarball",
+      "url": "https://elpa.gnu.org/packages/xref-1.7.0.tar"
+    },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
+    "packageRequires": {
+      "emacs": "26.1"
+    },
+    "version": "1.7.0"
+  }
+}
