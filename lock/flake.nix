@@ -43,6 +43,12 @@
       repo = "consult";
       type = "github";
     };
+    consult-eglot = {
+      flake = false;
+      owner = "mohkale";
+      repo = "consult-eglot";
+      type = "github";
+    };
     consult-org-roam = {
       flake = false;
       owner = "jgru";
@@ -120,6 +126,12 @@
       repo = "ef-themes";
       type = "github";
     };
+    eglot-booster = {
+      flake = false;
+      owner = "jdtsmith";
+      repo = "eglot-booster";
+      type = "github";
+    };
     eglot-java = {
       flake = false;
       owner = "yveszoundi";
@@ -142,6 +154,12 @@
       flake = false;
       owner = "oantolin";
       repo = "embark";
+      type = "github";
+    };
+    envrc = {
+      flake = false;
+      owner = "purcell";
+      repo = "envrc";
       type = "github";
     };
     "f" = {
@@ -174,6 +192,12 @@
       repo = "indent-bars";
       type = "github";
     };
+    inheritenv = {
+      flake = false;
+      owner = "purcell";
+      repo = "inheritenv";
+      type = "github";
+    };
     jinx = {
       flake = false;
       owner = "minad";
@@ -190,6 +214,12 @@
       flake = false;
       owner = "kubernetes-el";
       repo = "kubernetes-el";
+      type = "github";
+    };
+    ligature = {
+      flake = false;
+      owner = "mickeynp";
+      repo = "ligature.el";
       type = "github";
     };
     llama = {
@@ -305,6 +335,12 @@
       ref = "bugfix";
       type = "git";
       url = "https://git.savannah.gnu.org/git/emacs/org-mode.git";
+    };
+    org-appear = {
+      flake = false;
+      owner = "awth13";
+      repo = "org-appear";
+      type = "github";
     };
     org-download = {
       flake = false;

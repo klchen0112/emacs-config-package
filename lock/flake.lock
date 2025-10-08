@@ -112,6 +112,22 @@
         "type": "github"
       }
     },
+    "consult-eglot": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1756632318,
+        "narHash": "sha256-T6ZYTnc9tqwU+UE7f7Yk74mgPg8O5S9rnNZOQs5seBA=",
+        "owner": "mohkale",
+        "repo": "consult-eglot",
+        "rev": "d8b444aac39edfc6473ffbd228df3e9119451b51",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mohkale",
+        "repo": "consult-eglot",
+        "type": "github"
+      }
+    },
     "consult-org-roam": {
       "flake": false,
       "locked": {
@@ -320,6 +336,22 @@
         "type": "github"
       }
     },
+    "eglot-booster": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1752690112,
+        "narHash": "sha256-xUBQrQpw+JZxcqT1fy/8C2tjKwa7sLFHXamBm45Fa4Y=",
+        "owner": "jdtsmith",
+        "repo": "eglot-booster",
+        "rev": "cab7803c4f0adc7fff9da6680f90110674bb7a22",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jdtsmith",
+        "repo": "eglot-booster",
+        "type": "github"
+      }
+    },
     "eglot-java": {
       "flake": false,
       "locked": {
@@ -381,6 +413,22 @@
       "original": {
         "owner": "oantolin",
         "repo": "embark",
+        "type": "github"
+      }
+    },
+    "envrc": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1758100532,
+        "narHash": "sha256-Y0GHWhrUL8HrTaNvncDU9ZeB68o8Awb/8inP0M3js0g=",
+        "owner": "purcell",
+        "repo": "envrc",
+        "rev": "de1ae6e538764f74659f358b04af0d84fa0fef42",
+        "type": "github"
+      },
+      "original": {
+        "owner": "purcell",
+        "repo": "envrc",
         "type": "github"
       }
     },
@@ -464,6 +512,22 @@
         "type": "github"
       }
     },
+    "inheritenv": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1732024534,
+        "narHash": "sha256-qzM7uepVOTQyxJmngiePHVXFdeOw59wGvwiKl3xEDT4=",
+        "owner": "purcell",
+        "repo": "inheritenv",
+        "rev": "b9e67cc20c069539698a9ac54d0e6cc11e616c6f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "purcell",
+        "repo": "inheritenv",
+        "type": "github"
+      }
+    },
     "jinx": {
       "flake": false,
       "locked": {
@@ -509,6 +573,22 @@
       "original": {
         "owner": "kubernetes-el",
         "repo": "kubernetes-el",
+        "type": "github"
+      }
+    },
+    "ligature": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1701587986,
+        "narHash": "sha256-gY/WNiUJkPWpdpp4CUJtHbg85l+lbApl3O7eoOZCWN4=",
+        "owner": "mickeynp",
+        "repo": "ligature.el",
+        "rev": "6ac1634612dbd42f7eb81ecaf022bd239aabb954",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mickeynp",
+        "repo": "ligature.el",
         "type": "github"
       }
     },
@@ -817,6 +897,22 @@
         "url": "https://git.savannah.gnu.org/git/emacs/org-mode.git"
       }
     },
+    "org-appear": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1721139193,
+        "narHash": "sha256-5AuKlhBRqBqFBkDuVlTbBuFlSUdEn5P+JDz3VeG30ME=",
+        "owner": "awth13",
+        "repo": "org-appear",
+        "rev": "32ee50f8fdfa449bbc235617549c1bccb503cb09",
+        "type": "github"
+      },
+      "original": {
+        "owner": "awth13",
+        "repo": "org-appear",
+        "type": "github"
+      }
+    },
     "org-download": {
       "flake": false,
       "locked": {
@@ -1002,6 +1098,7 @@
         "compat": "compat",
         "cond-let": "cond-let",
         "consult": "consult",
+        "consult-eglot": "consult-eglot",
         "consult-org-roam": "consult-org-roam",
         "corfu": "corfu",
         "dape": "dape",
@@ -1015,18 +1112,22 @@
         "doom-modeline": "doom-modeline",
         "eat": "eat",
         "ef-themes": "ef-themes",
+        "eglot-booster": "eglot-booster",
         "eglot-java": "eglot-java",
         "emacsql": "emacsql",
         "embark": "embark",
         "embark-consult": "embark-consult",
+        "envrc": "envrc",
         "f": "f",
         "fullframe": "fullframe",
         "gcmh": "gcmh",
         "gradle-mode": "gradle-mode",
         "indent-bars": "indent-bars",
+        "inheritenv": "inheritenv",
         "jinx": "jinx",
         "kotlin-mode": "kotlin-mode",
         "kubernetes": "kubernetes",
+        "ligature": "ligature",
         "llama": "llama",
         "magit": "magit",
         "magit-popup": "magit-popup",
@@ -1046,6 +1147,7 @@
         "nushell-ts-mode": "nushell-ts-mode",
         "orderless": "orderless",
         "org": "org",
+        "org-appear": "org-appear",
         "org-download": "org-download",
         "org-modern": "org-modern",
         "org-modern-indent": "org-modern-indent",
