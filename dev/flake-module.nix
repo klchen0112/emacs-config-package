@@ -12,7 +12,6 @@
     {
       config,
       pkgs,
-      lib,
       ...
     }:
     {
@@ -21,7 +20,7 @@
       };
 
       pre-commit.settings.hooks = {
-        conform.enable = true;
+        # conform.enable = true;
         statix.settings.ignore = [ "lock" ];
       };
 
@@ -58,26 +57,28 @@
       };
 
       packages = {
-        default = pkgs.writeShellApplication {
-          name = "test-emacs-config";
-          runtimeInputs = [
-            pkgs.xorg.lndir
-          ]
-          ++ (lib.optional pkgs.stdenv.isDarwin [
-            config.packages.emacs-env-macport
-          ])
-          ++ (lib.optional pkgs.stdenv.isLinux [
-            config.packages.emacs-env-pgtk
-          ]);
-          text = ''
-            XDG_DATA_DIRS="$XDG_DATA_DIRS:${
-              builtins.concatStringsSep ":" (map (x: "${x}/share") config.packages.emacs-config.runtimeInputs)
-            }"
-            EMACS_DIR="$(mktemp -td emacs.XXXXXXXXXX)"
-            lndir -silent ${config.packages.emacs-config} "$EMACS_DIR"
-            emacs --init-directory "$EMACS_DIR" "$@"
-          '';
-        };
+        default =
+          let
+            emacs-env =
+              if pkgs.stdenv.isDarwin then config.packages.emacs-env else config.packages.emacs-env-pgtk;
+            emacs-config =
+              if pkgs.stdenv.isDarwin then config.packages.emacs-config else config.packages.emacs-config-pgtk;
+          in
+          pkgs.writeShellApplication {
+            name = "test-emacs-config";
+            runtimeInputs = [
+              pkgs.xorg.lndir
+              emacs-env
+            ];
+            text = ''
+              XDG_DATA_DIRS="$XDG_DATA_DIRS:${
+                builtins.concatStringsSep ":" (map (x: "${x}/share") emacs-config.runtimeInputs)
+              }"
+              EMACS_DIR="$(mktemp -td emacs.XXXXXXXXXX)"
+              lndir -silent ${emacs-config} "$EMACS_DIR"
+              emacs -nw --init-directory "$EMACS_DIR" "$@"
+            '';
+          };
 
         reloadEmacsConfig = pkgs.writeShellApplication {
           name = "reload-emacs-config";

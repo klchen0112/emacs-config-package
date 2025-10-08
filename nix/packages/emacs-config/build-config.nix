@@ -3,7 +3,6 @@
   stdenv,
   buildElispPackage,
   elispInputs,
-  emacs-all-the-icons-fonts,
   treesit-grammars,
   xorg,
   rootPath,
@@ -14,11 +13,9 @@ let
 
     src = lib.sourceByRegex rootPath [
       "init.org"
-      "early-init.org"
     ];
     files = [
       "init.org"
-      "early-init.org"
     ];
     lispFiles = [
       "early-init.el"

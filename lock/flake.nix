@@ -25,12 +25,6 @@
       repo = "cape";
       type = "github";
     };
-    closql = {
-      flake = false;
-      owner = "magit";
-      repo = "closql";
-      type = "github";
-    };
     compat = {
       flake = false;
       owner = "emacs-compat";
@@ -47,18 +41,6 @@
       flake = false;
       owner = "minad";
       repo = "consult";
-      type = "github";
-    };
-    consult-eglot = {
-      flake = false;
-      owner = "mohkale";
-      repo = "consult-eglot";
-      type = "github";
-    };
-    consult-eglot-embark = {
-      flake = false;
-      owner = "mohkale";
-      repo = "consult-eglot";
       type = "github";
     };
     consult-org-roam = {
@@ -138,12 +120,6 @@
       repo = "ef-themes";
       type = "github";
     };
-    eglot-booster = {
-      flake = false;
-      owner = "jdtsmith";
-      repo = "eglot-booster";
-      type = "github";
-    };
     eglot-java = {
       flake = false;
       owner = "yveszoundi";
@@ -168,22 +144,10 @@
       repo = "embark";
       type = "github";
     };
-    envrc = {
-      flake = false;
-      owner = "purcell";
-      repo = "envrc";
-      type = "github";
-    };
     "f" = {
       flake = false;
       owner = "rejeep";
       repo = "f.el";
-      type = "github";
-    };
-    forge = {
-      flake = false;
-      owner = "magit";
-      repo = "forge";
       type = "github";
     };
     fullframe = {
@@ -198,12 +162,6 @@
       repo = "gcmh";
       type = "gitlab";
     };
-    ghub = {
-      flake = false;
-      owner = "magit";
-      repo = "ghub";
-      type = "github";
-    };
     gradle-mode = {
       flake = false;
       owner = "scubacabra";
@@ -216,10 +174,10 @@
       repo = "indent-bars";
       type = "github";
     };
-    inheritenv = {
+    jinx = {
       flake = false;
-      owner = "purcell";
-      repo = "inheritenv";
+      owner = "minad";
+      repo = "jinx";
       type = "github";
     };
     kotlin-mode = {
@@ -232,12 +190,6 @@
       flake = false;
       owner = "kubernetes-el";
       repo = "kubernetes-el";
-      type = "github";
-    };
-    ligature = {
-      flake = false;
-      owner = "mickeynp";
-      repo = "ligature.el";
       type = "github";
     };
     llama = {
@@ -306,12 +258,6 @@
       repo = "nerd-icons.el";
       type = "github";
     };
-    nerd-icons-completion = {
-      flake = false;
-      owner = "rainstormstudio";
-      repo = "nerd-icons-completion";
-      type = "github";
-    };
     nerd-icons-corfu = {
       flake = false;
       owner = "LuigiPiucco";
@@ -353,12 +299,6 @@
       ref = "bugfix";
       type = "git";
       url = "https://git.savannah.gnu.org/git/emacs/org-mode.git";
-    };
-    org-appear = {
-      flake = false;
-      owner = "awth13";
-      repo = "org-appear";
-      type = "github";
     };
     org-download = {
       flake = false;
@@ -473,12 +413,6 @@
       repo = "transient";
       type = "github";
     };
-    treepy = {
-      flake = false;
-      owner = "volrath";
-      repo = "treepy.el";
-      type = "github";
-    };
     treesit-fold = {
       flake = false;
       owner = "emacs-tree-sitter";
@@ -512,12 +446,6 @@
       flake = false;
       owner = "magit";
       repo = "with-editor";
-      type = "github";
-    };
-    yaml = {
-      flake = false;
-      owner = "zkry";
-      repo = "yaml.el";
       type = "github";
     };
   };

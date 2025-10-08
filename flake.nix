@@ -98,7 +98,7 @@
                 sha256 = old.src.outputHash;
               };
             });
-            emacs-macport = pkgs.emacs-macport;
+            # emacs-macport = pkgs.emacs-macport;
 
             emacs-env = pkgs.callPackage ./nix/packages/emacs-env {
               org-babel-lib = inputs.org-babel.lib;
@@ -114,9 +114,9 @@
               emacs = config.packages.emacs-pgtk;
             };
 
-            emacs-env-macport = config.packages.emacs-env.override {
-              emacs = config.packages.emacs-macport;
-            };
+            #emacs-env-macport = config.packages.emacs-env.override {
+            #  emacs = config.packages.emacs-macport;
+            #};
 
             emacs-config = pkgs.callPackage ./nix/packages/emacs-config {
               twist-lib = inputs.twist.lib;
@@ -129,10 +129,10 @@
               emacs-env = config.packages.emacs-env-pgtk;
             };
 
-            emacs-config-macport = config.packages.emacs-config.override {
-              emacs = config.packages.emacs-macport;
-              emacs-env = config.packages.emacs-env-macport;
-            };
+            #emacs-config-macport = config.packages.emacs-config.override {
+            #  emacs = config.packages.emacs-macport;
+            #  emacs-env = config.packages.emacs-env-macport;
+            #};
           };
 
           apps = config.packages.emacs-env.makeApps { lockDirName = "lock"; };

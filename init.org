@@ -49,7 +49,90 @@ Nix:
 
 #+CAPTION: emacs-lisp-mode dark
 [[./media/emacs-lisp-mode-dark.png]]
+* Early initialization
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle early-init.el
+:END:
 
+#+begin_src emacs-lisp :tangle early-init.el
+;;; early-init.el --- Early Initialization -*- lexical-binding: t; -*-
+#+end_src
+
+** Debug
+Provide an easy way to toggle debug mode which will set certain variables to produce more
+informative output. It can be set either by providing the environment variable =DEBUG= or
+start Emacs with =--debug-init=.
+#+begin_src emacs-lisp :tangle early-init.el
+(when (getenv "DEBUG") (setq init-file-debug t))
+(setq debug-on-error (and (not noninteractive) init-file-debug))
+#+end_src
+
+** Startup
+
+Temporarily reduce garbage collection to gain some performance boost during startup.
+#+begin_src emacs-lisp :tangle early-init.el
+(let ((normal-gc-cons-threshold gc-cons-threshold)
+      (normal-gc-cons-percentage gc-cons-percentage)
+      (normal-file-name-handler-alist file-name-handler-alist)
+      (init-gc-cons-threshold most-positive-fixnum)
+      (init-gc-cons-percentage 0.6))
+  (setq gc-cons-threshold init-gc-cons-threshold
+        gc-cons-percentage init-gc-cons-percentage
+        file-name-handler-alist nil)
+  (add-hook 'after-init-hook
+            `(lambda ()
+               (setq gc-cons-threshold ,normal-gc-cons-threshold
+                     gc-cons-percentage ,normal-gc-cons-percentage
+                     file-name-handler-alist ',normal-file-name-handler-alist))))
+#+end_src
+
+Inhibit startup screen and messages. If you are new to Emacs it is recommended to not
+disable the startup screen as it has great content to get you going.
+#+begin_src emacs-lisp :tangle early-init.el
+(setq inhibit-startup-echo-area-message t)
+(setq inhibit-startup-screen t)
+(setq initial-scratch-message nil)
+#+end_src
+
+Performance tweaks.  Don't load default library and use =fundamental-mode= to reduce amount
+of hooks.
+#+begin_src emacs-lisp :tangle early-init.el
+(setq inhibit-default-init t)
+(setq initial-major-mode 'fundamental-mode)
+#+end_src
+
+Disable =package.el= support. Packages are managed via Nix and disabling this gives a slight
+performance boost.
+#+begin_src emacs-lisp :tangle early-init.el
+(setq package-enable-at-startup nil)
+(setq package-quickstart nil)
+#+end_src
+
+** UI
+Disable GUI components.
+#+begin_src emacs-lisp :tangle early-init.el
+(setq use-dialog-box nil)
+(push '(undecorated . t) default-frame-alist)
+(push '(menu-bar-lines . 0) default-frame-alist)
+(push '(tool-bar-lines . 0) default-frame-alist)
+(push '(vertical-scroll-bars) default-frame-alist)
+#+end_src
+
+Don't implicitly resize frames when changing various settings.
+#+begin_src emacs-lisp :tangle early-init.el
+(setq frame-inhibit-implied-resize t)
+(defvar global-text-scale-adjust-resizes-frames t)
+#+end_src
+
+Allow resizing by dragging internal border.
+#+begin_src emacs-lisp :tangle early-init.el
+(push '(drag-internal-border . t) default-frame-alist)
+#+end_src
+
+Ignore X resources.
+#+begin_src emacs-lisp :tangle early-init.el
+(advice-add #'x-apply-session-resources :override #'ignore)
+#+end_src
 * Initialization
 
 #+begin_src emacs-lisp
@@ -92,6 +175,17 @@ Nix:
       "Fake installation of PACKAGE."
       :repeatable t
       :shorthand cadr))
+#+end_src
+*** :defer
+
+#+begin_src emacs-lisp
+(eval-when-compile
+  (define-setup-macro :defer (seconds &optional func)
+    "Call a function at N seconds after init."
+    `(add-hook 'after-init-hook
+               (lambda ()
+                 (run-with-timer ,seconds nil
+                                 ,(or func (setup-get 'hook)))))))
 #+end_src
 *** :reformatters
 #+begin_src emacs-lisp
@@ -439,7 +533,9 @@ configured via the =internal-border-width= in the [[Frame][Frame]] section.
   (setup meow-tree-sitter
          (:package meow-tree-sitter)
          (:also-load treesit)
-         (:when-loaded (meow-tree-sitter-register-defaults)))
+         (:when-loaded (meow-tree-sitter-register-defaults)
+         )
+        )
 #+end_src
 ** Keybiding
 *** Which-key
@@ -569,12 +665,12 @@ Vertical interactive completion UI.
 
 *** nerd-icons-completion
 #+begin_src emacs-lisp
-(setup nerd-icons-completion
-       (:package nerd-icons-completion)
-       (:also-load nerd-icons)
-       (:when-loaded
-  	(add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
-       )
+;;(setup nerd-icons-completion
+;;       (:package nerd-icons-completion)
+;;       (:also-load nerd-icons)
+;;       (:when-loaded
+;;  	(add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+;;       )
 
 #+end_src
 
@@ -583,9 +679,11 @@ Completion At Point Extensions.
 #+begin_src emacs-lisp
 (setup cape
        (:package cape)
+       (:when-loaded
        (add-hook 'completion-at-point-functions #'cape-dabbrev)
        (add-hook 'completion-at-point-functions #'cape-file)
        (add-hook 'completion-at-point-functions #'cape-elisp-block)
+       )
        )
 #+end_src
 
@@ -597,8 +695,9 @@ Commands compatible with ~completing-read~.
        (:set consult-preview-key "M-RET"))
 
 (setup consult-xref
-       (:set xref-show-xrefs-function #'consult-xref)
-       (:set xref-show-definitions-function #'consult-xref)
+(:when-loaded
+       (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref))
        (:load-after consult xref)
        )
 #+end_src
@@ -847,19 +946,18 @@ Enhanced git related views and commands.
        (:package magit)
        )
 
-(setup forge
-       (:package forge))
+;;(setup forge
+;;      (:package forge))
 #+end_src
 
 ** Env
 
 #+begin_src emacs-lisp
-(setup envrc
-       (:package envrc)
-       (:execute-find direnv)
-       (:with-mode envrc-global-mode
-                   (:hook-into after-init-hook))
-       )
+;;(setup envrc
+;;       (:package envrc)
+;;       (:with-mode envrc-global-mode
+;;                   (:hook-into after-init-hook))
+;;       )
 #+end_src
 ** LSP
 *** eglot
@@ -876,25 +974,19 @@ Generic Language Server Protocol integration via ~eglot~.
        )
 )
 
-(setup consult-eglot
-       (:package consult-eglot)
-       (with-eval-after-load 'eglot
-         (require 'consult-eglot))
-       )
+;;(setup consult-eglot
+;;       (:package consult-eglot)
+;;       (:load-after eglot)
+;;    (:with-feature consult-eglot-embark
+;;         (consult-eglot-embark-mode))
+;;
+;;       )
 
-(setup consult-eglot-embark
-       (:package consult-eglot-embark)
-       (with-eval-after-load 'consult-eglot
-         (require 'consult-eglot-embark)
-         (consult-eglot-embark-mode))
-
-       )
-
-(setup eglot-booster
-       (:package eglot-booster)
-       (:set eglot-booster-io-only t)
-       (:hook-into eglot-mode-hook)
-       )
+;;(setup eglot-booster
+;;       (:package eglot-booster)
+;;       (:set eglot-booster-io-only t)
+;;       (:when-loaded (:hook-into eglot-mode-hook))
+;;       )
 
 #+end_src
 ** Debugger
@@ -915,16 +1007,16 @@ Generic Language Server Protocol integration via ~eglot~.
 * Appearance
 *** Ligatures
 #+begin_src emacs-lisp
-(setup ligature
-       (:package ligature)
-       (:hook-into prog-mode-hook)
-       (:set ligature-set-ligatures
-             'prog-mode
-             '("-<<" "-<" "-<-" "<--" "<---" "<<-" "<-" "->" "->>" "-->" "--->" "->-" ">-" ">>-" "<->" "<-->" "<--->" "<---->" "<!--"
-               "=<<" "=<" "=<=" "<==" "<===" "<<=" "<=" "=>" "=>>" "==>" "===>" "=>=" ">=" ">>=" "<=>" "<==>" "<===>" "<====>" "<!---"
-               "<------" "------>" "<=====>" "<~~" "<~" "~>" "~~>" "::" ":::" "\\/" "/\\" "==" "!=" "/=" "~=" "<>" "===" "!==" "=/=" "=!="
-               ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "<." "<.>" ".>" "+:" "-:" "=:" "<******>" "(*" "*)" "++" "+++" "|-" "-|"
-               "&&" "||")))
+;;(setup ligature
+;;       (:package ligature)
+;;       (:hook-into prog-mode-hook)
+;;       (:set ligature-set-ligatures
+;;             'prog-mode
+;;             '("-<<" "-<" "-<-" "<--" "<---" "<<-" "<-" "->" "->>" "-->" "--->" "->-" ">-" ">>-" "<->" "<-->" "<--->" "<---->" "<!--"
+;;               "=<<" "=<" "=<=" "<==" "<===" "<<=" "<=" "=>" "=>>" "==>" "===>" "=>=" ">=" ">>=" "<=>" "<==>" "<===>" "<====>" "<!---"
+;;               "<------" "------>" "<=====>" "<~~" "<~" "~>" "~~>" "::" ":::" "\\/" "/\\" "==" "!=" "/=" "~=" "<>" "===" "!==" "=/=" "=!="
+;;               ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "<." "<.>" ".>" "+:" "-:" "=:" "<******>" "(*" "*)" "++" "+++" "|-" "-|"
+;;               "&&" "||")))
 
 (setup prog-mode
   (:set prettify-symbols-unprettify-at-point t))
@@ -957,7 +1049,7 @@ Generic Language Server Protocol integration via ~eglot~.
 
 (setup org-modern
        (:package org-modern)
-       (:hook-into org-mode-hook)
+       ;;(:hook-into org-mode-hook)
        (:set
   	;; Edit settings
   	org-auto-align-tags nil
@@ -983,9 +1075,9 @@ Generic Language Server Protocol integration via ~eglot~.
   	(set-face-background 'fringe (face-attribute 'default :background))
   	))
 
-(setup org-appear
-       (:package org-appear)
-       (:hook-into org-mode-hook))
+;;(setup org-appear
+;;       (:package org-appear)
+;;       (:when-loaded (:hook-into org-mode-hook)))
 
 #+end_src
 ** Org-roam
@@ -1011,12 +1103,9 @@ Generic Language Server Protocol integration via ~eglot~.
   	      )
   	))
 
-  (setup org-roam
-    (:load-after org-roam)
-         (:also-load org-roam-timestamps))
   (setup org-roam-timestamps
          (:package org-roam-timestamps)
-         (:hook-into org-roam-mode-hook)
+         ;;(:hook-into org-roam-mode-hook)
          (:set org-roam-timestamps-parent-file t))
 
 
@@ -1832,4 +1921,11 @@ Display current path for HTML/XML/CSS.
 #+begin_src emacs-lisp
 (setup eat
        (:package eat))
+#+end_src
+
+** Check
+
+#+begin_src emacs-lisp
+(setup jinx
+(:package jinx))
 #+end_src

@@ -1,12 +1,8 @@
 {
   stdenv,
-  cmake,
-  emacs,
-  enchant2,
-  gcc,
-  libvterm-neovim,
   pkg-config,
-  unzip,
+  enchant2,
+  ...
 }:
 
 _final: prev: {
@@ -43,8 +39,8 @@ _final: prev: {
     '';
   });
 
-  nov = prev.nov.overrideAttrs (old: {
-    propagatedBuildInputs = (old.propagatedBuildInputs or [ ]) ++ [ unzip ];
-  });
+  #nov = prev.nov.overrideAttrs (old: {
+  #  propagatedBuildInputs = (old.propagatedBuildInputs or [ ]) ++ [ unzip ];
+  #});
 
 }
