@@ -76,8 +76,15 @@
                 builtins.concatStringsSep ":" (map (x: "${x}/share") emacs-config.runtimeInputs)
               }"
               EMACS_DIR="$(mktemp -td emacs.XXXXXXXXXX)"
+
+              cleanup() {
+                rm -rf "$EMACS_DIR"
+              }
+
+              trap cleanup ERR EXIT
+
               lndir -silent ${emacs-config} "$EMACS_DIR"
-              emacs --init-directory "$EMACS_DIR" "$@"
+              emacs -nw --debug-init --init-directory "$EMACS_DIR" "$@"
 
             '';
           };
