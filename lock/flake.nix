@@ -312,6 +312,12 @@
       repo = "org-modern";
       type = "github";
     };
+    org-modern-indent = {
+      flake = false;
+      owner = "jdtsmith";
+      repo = "org-modern-indent";
+      type = "github";
+    };
     org-roam = {
       flake = false;
       owner = "org-roam";

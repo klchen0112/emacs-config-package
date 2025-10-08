@@ -1025,59 +1025,61 @@ Generic Language Server Protocol integration via ~eglot~.
 * Writing
 ** Org
 #+begin_src emacs-lisp
-(setup org
-       (:package org)
-       (:set org-directory "~/org")
-       (:with-feature org-agenda
-  		      (:set
-  		       ;; 时间前导0
-  		       org-agenda-time-leading-zero t
-  		       ;; 默认显示区间
-  		       org-agenda-span 7
-  		       ;; agenda view 默认从周一开始显示
-  		       org-agenda-start-on-weekday 1)
-  		      )
-       )
+  (setup org
+         (:package org)
+         (:set org-directory "~/org")
+         (:with-feature org-agenda
+    		      (:set
+    		       ;; 时间前导0
+    		       org-agenda-time-leading-zero t
+    		       ;; 默认显示区间
+    		       org-agenda-span 7
+    		       ;; agenda view 默认从周一开始显示
+    		       org-agenda-start-on-weekday 1)
+    		      )
+         )
 
-(setup org-download
-       (:package org-download)
-       (:load-after org)
-       (:set   org-download-method 'directory
-  	       org-download-image-dir "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/org-attach"
-  	       org-download-heading-lvl 'nil)
-       )
+  (setup org-download
+         (:package org-download)
+         (:load-after org)
+         (:set   org-download-method 'directory
+    	       org-download-image-dir "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/org-attach"
+    	       org-download-heading-lvl 'nil)
+         )
 
-(setup org-modern
-       (:package org-modern)
-       ;;(:hook-into org-mode-hook)
-       (:set
-  	;; Edit settings
-  	org-auto-align-tags nil
-  	org-tags-column 0
-  	org-catch-invisible-edits 'show-and-error
-  	org-special-ctrl-a/e t
-  	org-insert-heading-respect-content t
+  (setup org-modern
+         (:package org-modern)
+         ;;(:hook-into org-mode-hook)
+         (:set
+    	;; Edit settings
+    	org-auto-align-tags nil
+    	org-tags-column 0
+    	org-catch-invisible-edits 'show-and-error
+    	org-special-ctrl-a/e t
+    	org-insert-heading-respect-content nil
 
-  	;; Org styling, hide markup etc.
-  	org-hide-emphasis-markers t
-  	org-pretty-entities t
-  	org-agenda-tags-column 0
-  	org-ellipsis "…")
-       (:when-loaded
-  	(modify-all-frames-parameters
-  	 '((right-divider-width . 40)
-  	   (internal-border-width . 40)))
-  	(dolist (face '(window-divider
-  			window-divider-first-pixel
-  			window-divider-last-pixel))
-  	  (face-spec-reset-face face)
-  	  (set-face-foreground face (face-attribute 'default :background)))
-  	(set-face-background 'fringe (face-attribute 'default :background))
-  	))
+    	;; Org styling, hide markup etc.
+    	org-hide-emphasis-markers t
+    	org-pretty-entities t
+    	org-agenda-tags-column 0
+    	org-ellipsis "…")
+         (:when-loaded
+    	(modify-all-frames-parameters
+    	 '((right-divider-width . 40)
+    	   (internal-border-width . 40)))
+    	(dolist (face '(window-divider
+    			window-divider-first-pixel
+    			window-divider-last-pixel))
+    	  (face-spec-reset-face face)
+    	  (set-face-foreground face (face-attribute 'default :background)))
+    	(set-face-background 'fringe (face-attribute 'default :background))
+    	))
 
-;;(setup org-appear
-;;       (:package org-appear)
-;;       (:when-loaded (:hook-into org-mode-hook)))
+  (setup org-modern-indent
+    (:package org-modern-indent))
+  ;;(setup org-appear
+  ;;       (:package org-appear)
+  ;;       (:when-loaded (:hook-into org-mode-hook)))
 
 #+end_src
 ** Org-roam

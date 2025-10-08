@@ -833,6 +833,22 @@
         "type": "github"
       }
     },
+    "org-modern-indent": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1744503427,
+        "narHash": "sha256-st3338Jk9kZ5BLEPRJZhjqdncMpLoWNwp60ZwKEObyU=",
+        "owner": "jdtsmith",
+        "repo": "org-modern-indent",
+        "rev": "9973bd3b91e4733a3edd1fca232208c837c05473",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jdtsmith",
+        "repo": "org-modern-indent",
+        "type": "github"
+      }
+    },
     "org-roam": {
       "flake": false,
       "locked": {
@@ -1015,6 +1031,7 @@
         "org": "org",
         "org-download": "org-download",
         "org-modern": "org-modern",
+        "org-modern-indent": "org-modern-indent",
         "org-roam": "org-roam",
         "org-roam-timestamps": "org-roam-timestamps",
         "org-roam-ui": "org-roam-ui",

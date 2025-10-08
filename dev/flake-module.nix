@@ -20,7 +20,8 @@
       };
 
       pre-commit.settings.hooks = {
-        # conform.enable = true;
+        conform.enable = true;
+
         statix.settings.ignore = [ "lock" ];
       };
 
@@ -76,7 +77,8 @@
               }"
               EMACS_DIR="$(mktemp -td emacs.XXXXXXXXXX)"
               lndir -silent ${emacs-config} "$EMACS_DIR"
-              emacs -nw --init-directory "$EMACS_DIR" "$@"
+              emacs --init-directory "$EMACS_DIR" "$@"
+
             '';
           };
 
