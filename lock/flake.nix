@@ -258,6 +258,12 @@
       repo = "nerd-icons.el";
       type = "github";
     };
+    nerd-icons-completion = {
+      flake = false;
+      owner = "rainstormstudio";
+      repo = "nerd-icons-completion";
+      type = "github";
+    };
     nerd-icons-corfu = {
       flake = false;
       owner = "LuigiPiucco";

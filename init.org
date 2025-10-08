@@ -524,15 +524,16 @@ configured via the =internal-border-width= in the [[Frame][Frame]] section.
   (setup meow
          (:package meow)
          (:also-load lib-meow)
-         (:also-load meow-tree-sitter)
          (:with-function meow-setup (:autoload-this))
          (meow-global-mode 1)
          (meow-setup)
          )
+ (setup lib-meow
+        (:package lib-meow))
 
   (setup meow-tree-sitter
          (:package meow-tree-sitter)
-         (:also-load treesit)
+         (:load-after meow)
          (:when-loaded (meow-tree-sitter-register-defaults)
          )
         )
@@ -665,12 +666,12 @@ Vertical interactive completion UI.
 
 *** nerd-icons-completion
 #+begin_src emacs-lisp
-;;(setup nerd-icons-completion
-;;       (:package nerd-icons-completion)
-;;       (:also-load nerd-icons)
-;;       (:when-loaded
-;;  	(add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
-;;       )
+(setup nerd-icons-completion
+       (:package nerd-icons-completion)
+       (:also-load nerd-icons)
+       (:when-loaded
+  	(add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+       )
 
 #+end_src
 
@@ -855,36 +856,37 @@ Code folding with treesit-fold
 #+begin_src emacs-lisp
 (setup reformatter
        (:package reformatter)
-       (:reformatters
+    ;;   (:reformatters
   	;; If you use prettier, you need to install its executable separately.
-  	(prettier
-  	 :program "prettier"
-  	 :args (list (concat "--plugin-search-dir="
-                             (expand-file-name
-                              (locate-dominating-file default-directory "package.json")))
-                     "--stdin-filepath" (buffer-file-name)))
-  	(treefmt
-  	 :program "treefmt"
-  	 :args (list "--stdin" (buffer-file-name)))
+  	;;(prettier
+  	;; :program "prettier"
+  	;; :args (list (concat "--plugin-search-dir="
+    ;;                         (expand-file-name
+    ;;                          (locate-dominating-file default-directory "package.json")))
+    ;;                 "--stdin-filepath" (buffer-file-name)))
+  	;;(treefmt
+  	;; :program "treefmt"
+  	;; :args (list "--stdin" (buffer-file-name)))
 
-  	(yamlfmt
-  	 :program "yamlfmt"
-  	 :args (list "-"))
+  	;;(yamlfmt
+  	;; :program "yamlfmt"
+  	;; :args (list "-"))
 
-  	(jq-format
-  	 :program "jq"
-  	 :args (list "."))
+  	;;(jq-format
+  	;; :program "jq"
+  	;; :args (list "."))
 
-  	(biome-format
-  	 :program
-  	 (cond
-  	  ((executable-find "bunx")
-  	   "bunx"))
-  	 :args (append (cond
-  			((executable-find "bunx")
-  			 nil))
-                       (list "@biomejs/biome" "format" (buffer-file-name)
-                             (concat "--stdin-file-path=" (buffer-file-name)))))))
+  	;;(biome-format
+  	;; :program
+  	;; (cond
+  	;;  ((executable-find "bunx")
+  	;;   "bunx"))
+  	;; :args (append (cond
+  	;;		((executable-find "bunx")
+  	;;		 nil))
+    ;;                   (list "@biomejs/biome" "format" (buffer-file-name)
+    ;;                         (concat "--stdin-file-path=" (buffer-file-name))))))
+    )
 
 #+end_src
 
@@ -965,7 +967,6 @@ Generic Language Server Protocol integration via ~eglot~.
 #+begin_src emacs-lisp
 (setup eglot
        (:package eglot)
-       (:defer 3)
        (:set
         eglot-autoshutdown t
         eglot-code-action-indications nil
@@ -983,6 +984,7 @@ Generic Language Server Protocol integration via ~eglot~.
 ;;       )
 
 ;;(setup eglot-booster
+
 ;;       (:package eglot-booster)
 ;;       (:set eglot-booster-io-only t)
 ;;       (:when-loaded (:hook-into eglot-mode-hook))
@@ -1026,6 +1028,7 @@ Generic Language Server Protocol integration via ~eglot~.
 ** Org
 #+begin_src emacs-lisp
   (setup org
+  (:defer 5)
          (:package org)
          (:set org-directory "~/org")
          (:with-feature org-agenda
@@ -1033,7 +1036,7 @@ Generic Language Server Protocol integration via ~eglot~.
     		       ;; 时间前导0
     		       org-agenda-time-leading-zero t
     		       ;; 默认显示区间
-    		       org-agenda-span 7
+    		       org-agenda-span 6
     		       ;; agenda view 默认从周一开始显示
     		       org-agenda-start-on-weekday 1)
     		      )
@@ -1049,7 +1052,8 @@ Generic Language Server Protocol integration via ~eglot~.
 
   (setup org-modern
          (:package org-modern)
-         ;;(:hook-into org-mode-hook)
+         (:load-after org)
+         (:hook-into org-mode-hook)
          (:set
     	;; Edit settings
     	org-auto-align-tags nil
@@ -1076,7 +1080,9 @@ Generic Language Server Protocol integration via ~eglot~.
     	))
 
   (setup org-modern-indent
-    (:package org-modern-indent))
+    (:package org-modern-indent)
+         (:hook-into org-mode-hook)
+         (:load-after org))
   ;;(setup org-appear
   ;;       (:package org-appear)
   ;;       (:when-loaded (:hook-into org-mode-hook)))
@@ -1097,6 +1103,7 @@ Generic Language Server Protocol integration via ~eglot~.
   (setup org-roam-ui
   (:load-after org-roam)
          (:package org-roam-ui)
+         (:load-after org-roam)
          (:when-loaded
   	(setq org-roam-ui-sync-theme t
                 org-roam-ui-follow t
@@ -1107,7 +1114,8 @@ Generic Language Server Protocol integration via ~eglot~.
 
   (setup org-roam-timestamps
          (:package org-roam-timestamps)
-         ;;(:hook-into org-roam-mode-hook)
+         (:load-after org-roam)
+         (:hook-into org-roam-mode-hook)
          (:set org-roam-timestamps-parent-file t))
 
 
@@ -1133,6 +1141,10 @@ Generic Language Server Protocol integration via ~eglot~.
 #+end_src
 *
 * Major modes
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no
+:END:
+
 ** emacs-lisp
 #+begin_src emacs-lisp
 (setup elisp-mode
@@ -1464,6 +1476,7 @@ Elm and elm-mode seems unmaintained at the moment, so I disable this.
 
 (setup eglot-java
        (:package eglot-java)
+       (:load-after eglot)
        (:hook-into java-base-mode-hook)
        )
 
@@ -1612,7 +1625,7 @@ Generate Table of Contents.
 (setup nix-ts-mode
        (:package nix-ts-mode)
   (:file-match "\\.nix\\'")
-  (:hook eglot-ensure nix-ts-mode-set-devdocs))
+  (:hook eglot-mode-hook))
 (setup nix-mode
        (:package nix-mode))
 #+end_src

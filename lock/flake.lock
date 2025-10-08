@@ -688,6 +688,22 @@
         "type": "github"
       }
     },
+    "nerd-icons-completion": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1758810034,
+        "narHash": "sha256-LrdbMMcFQP00NEkxL5uuRCf6Z0AjbAXCs2PXAnMw4yI=",
+        "owner": "rainstormstudio",
+        "repo": "nerd-icons-completion",
+        "rev": "63a6b3f1eb98bb381c86a1658ac401c8967079b8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rainstormstudio",
+        "repo": "nerd-icons-completion",
+        "type": "github"
+      }
+    },
     "nerd-icons-corfu": {
       "flake": false,
       "locked": {
@@ -1022,6 +1038,7 @@
         "meow-tree-sitter": "meow-tree-sitter",
         "modus-themes": "modus-themes",
         "nerd-icons": "nerd-icons",
+        "nerd-icons-completion": "nerd-icons-completion",
         "nerd-icons-corfu": "nerd-icons-corfu",
         "nerd-icons-dired": "nerd-icons-dired",
         "nix-mode": "nix-mode",

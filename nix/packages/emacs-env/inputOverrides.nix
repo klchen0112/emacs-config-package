@@ -79,4 +79,11 @@
       "lisp/readable-typo-theme.el"
     ];
   };
+
+  lib-meow = _: _: {
+    src = lib.sourceByRegex rootPath [
+      "lisp"
+      "lisp/lib-meow.el"
+    ];
+  };
 }

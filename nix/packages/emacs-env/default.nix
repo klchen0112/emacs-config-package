@@ -15,10 +15,6 @@ let
   initEl = lib.pipe (rootPath + "/init.org") [
     builtins.readFile
     (org-babel-lib.tangleOrgBabel {
-      languages = [
-        "emacs-lisp"
-        "elisp"
-      ];
     })
     (builtins.toFile "init.el")
   ];
@@ -45,14 +41,7 @@ in
       ;
   };
 
-  inputOverrides = import ./inputOverrides.nix { inherit rootPath lib; } // {
-    lib-meow = _: _: {
-      src = lib.sourceByRegex rootPath [
-        "lisp"
-        "lisp/lib-meow.el"
-      ];
-    };
-  };
+  inputOverrides = import ./inputOverrides.nix { inherit rootPath lib; };
 
   initialLibraries = [
     "cl-lib"
@@ -70,6 +59,6 @@ in
   localPackages = [
     "lib-meow"
   ];
-  exportManifest = true;
+  # exportManifest = true;
 }).overrideScope
   packageOverrides
